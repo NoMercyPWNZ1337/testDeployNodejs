@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Додавання товару</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-panel {
+            width: 60%;
+            margin: 0 auto;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label, input, textarea {
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 150px;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .image-preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-panel">
+        <h1>Додавання нового товару</h1>
+        <form id="add-product-form">
+            <label for="product-name">Назва товару:</label>
+            <input type="text" id="product-name" name="name" required>
+
+            <label for="product-price">Ціна товару (грн):</label>
+            <input type="number" id="product-price" name="price" required>
+
+            <label for="product-id">ID товару:</label>
+            <input type="number" id="product-id" name="_id" required>
+
+            <label for="product-description">Опис товару:</label>
+            <textarea id="product-description" name="description" required></textarea>
+
+            <label for="product-images">Зображення товару:</label>
+            <input type="file" id="product-images" name="images" multiple accept="image/*">
+            
+            <div class="image-preview" id="image-preview"></div> <!-- Контейнер для превью -->
+
+            <label for="product-alt">Alt текст для зображень:</label>
+            <input type="text" id="product-alt" name="alt" required>
+
+            <button type="submit">Додати товар</button>
+        </form>
+    </div>
+    <a href="catalog.html">Каталог</a>
+
+    <script>
+        const productImagesInput = document.getElementById('product-images');
+        const imagePreviewContainer = document.getElementById('image-preview');
+
+        // Функция для отображения превью изображений
+        productImagesInput.addEventListener('change', function() {
+            const files = productImagesInput.files;
+            imagePreviewContainer.innerHTML = ''; // Очищаем контейнер перед добавлением новых превью
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageElement = document.createElement('img');
+                    imageElement.src = e.target.result;
+                    imageElement.alt = file.name;
+                    imagePreviewContainer.appendChild(imageElement);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        document.getElementById('add-product-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('product-name').value);
+            formData.append('price', document.getElementById('product-price').value);
+            formData.append('_id', document.getElementById('product-id').value);
+            formData.append('description', document.getElementById('product-description').value);
+            formData.append('alt', document.getElementById('product-alt').value);
+
+            // Додаємо зображення до formData
+            const images = document.getElementById('product-images').files;
+            for (let i = 0; i < images.length; i++) {
+                formData.append('images', images[i]);
+            }
+
+            // Надсилаємо дані на сервер (POST запит)
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            console.log(result);
+
+            if (response.ok) {
+                alert('Товар успішно доданий!');
+            } else {
+                alert('Сталася помилка при додаванні товару.');
+            }
+        });
+    </script>
+</body>
+</html>

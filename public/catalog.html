@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог товарів</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .product-card {
+            border: 1px solid #ccc;
+            padding: 16px;
+            margin: 16px;
+            width: 300px;
+            float: left;
+            text-align: center;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: auto;
+        }
+
+        .product-card h3 {
+            margin: 10px 0;
+        }
+
+        .product-card p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="products-container" id="products-container">
+        <!-- Сюда будут динамически добавляться карточки товаров -->
+    </div>
+    <a href="admin.html">Адмін</a>
+
+    <script>
+        // Получаем товары с сервера и выводим их на страницу
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+
+                const productsContainer = document.getElementById('products-container');
+                productsContainer.innerHTML = ''; // Очищаем контейнер
+
+                products.forEach(product => {
+                    const productCard = `
+                        <div class="product-card">
+<div class="product-images">
+    ${product.images.map(image => `<img src="${image}" alt="${product.alt}" class="product-image" />`).join('')}
+</div>                            
+<h3>${product.name}</h3>
+                            <p>Ціна: ${product.price} грн</p>
+                            <p>${product.description}</p>
+                        </div>
+                    `;
+                    productsContainer.insertAdjacentHTML('beforeend', productCard);
+                });
+            } catch (error) {
+                console.error('Помилка завантаження товарів:', error);
+            }
+        }
+
+        // Загружаем товары при загрузке страницы
+        window.onload = fetchProducts;
+    </script>
+</body>
+
+</html>
